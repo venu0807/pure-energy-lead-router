@@ -1,0 +1,22 @@
+# Firebase & Google Cloud Credentials
+serviceAccountKey.json
+*.keystore
+.firebase/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+
+# Node
+node_modules/
+npm-debug.log*
+
+# OS & Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

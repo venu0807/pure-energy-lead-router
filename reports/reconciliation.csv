@@ -1,0 +1,41 @@
+lead_id,action,reason
+L1001,imported,Clean record; routed to Kandi Energy Point (Sangareddy)
+L1002,imported,Clean record; routed to Krishna Energy Store (Vijayawada)
+L1003,imported,Clean record; routed to Vizag Home Power (Visakhapatnam)
+L1004,fixed,Sanitized phone from '98480 22 431' to '9848022431'
+L1005,imported,Clean record; routed to Krishna Energy Store (Vijayawada)
+L1006,fixed,Sanitized phone from '+91-9000012345' to '9000012345'
+L1007,imported,Clean record; routed to Sri Sai Power Solutions (Hyderabad)
+L1008,imported,Clean record; routed to Krishna Energy Store (Vijayawada)
+L1009,rejected,Invalid phone format: '12345' (must be 10-digit mobile)
+L1010,imported,Clean record; routed to Guntur Battery World (Guntur)
+L1011,imported,Clean record; routed to Krishna Energy Store (Vijayawada)
+L1012,rejected,Invalid pincode format: '5000' (must be 6 digits)
+L1013,imported,Clean record; routed to Vizag Home Power (Visakhapatnam)
+L1014,imported,Clean record; routed to Krishna Energy Store (Vijayawada)
+L1015,assigned_inhouse,Pincode prefix 110 not covered by authorized dealers; assigned to In-house Sales
+L1016,imported,Clean record; routed to Krishna Energy Store (Vijayawada)
+L1017,imported,Clean record; routed to Vizag Home Power (Visakhapatnam)
+L1018,rejected,Invalid calendar date: '31/09/2026' (non-existent date like 31/09)
+L1019,imported,Clean record; routed to Krishna Energy Store (Vijayawada)
+L1020,fixed,Normalized status from 'converted' to 'Converted'
+L1021,imported,Clean record; routed to Sri Sai Power Solutions (Hyderabad)
+L1022,imported,Clean record; routed to Tirupati PowerHouse (Tirupati)
+L1023,fixed,Standardized product name to 'PuREPower Home 5kWh'
+L1024,imported,Clean record; routed to Kandi Energy Point (Sangareddy)
+L1025,imported,Clean record; routed to Guntur Battery World (Guntur)
+L1026,rejected,Missing customer name
+L1027,imported,Clean record; routed to Krishna Energy Store (Vijayawada)
+L1028,fixed,Standardized source casing to 'Website'
+L1029,imported,Clean record; routed to Tirupati PowerHouse (Tirupati)
+L1030,imported,Clean record; routed to Vizag Home Power (Visakhapatnam)
+L1031,imported,Clean record; routed to Kandi Energy Point (Sangareddy)
+L1032,imported,Clean record; routed to Karimnagar Solar Hub (Karimnagar)
+L1033,imported,Clean record; routed to Kandi Energy Point (Sangareddy)
+L1034,imported,Clean record; routed to Kandi Energy Point (Sangareddy)
+L1035,imported,Clean record; routed to Krishna Energy Store (Vijayawada)
+L1036,merged,Duplicate mobile 9565623510; merged into primary lead L1003
+L1037,merged,Duplicate mobile 9633021001; merged into primary lead L1010
+L1038,merged,Duplicate mobile 9166838090; merged into primary lead L1031
+L1039,merged,Duplicate mobile 9680557051; merged into primary lead L1007
+L1033,merged,Duplicate mobile 9663925448; merged into primary lead L1013

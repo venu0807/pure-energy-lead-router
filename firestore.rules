@@ -1,0 +1,63 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper validation functions
+    function isValidMobile(mobile) {
+      return mobile is string && mobile.matches('^[6-9][0-9]{9}$');
+    }
+    
+    function isValidPincode(pincode) {
+      return pincode is string && pincode.matches('^[1-9][0-9]{5}$');
+    }
+    
+    function isValidStatus(status) {
+      return status in ['New', 'Contacted', 'Converted', 'Lost'];
+    }
+    
+    function isValidProduct(product) {
+      return product in [
+        'PuREPower Home 3kWh',
+        'PuREPower Home 5kWh',
+        'PuREPower Commercial 10kWh'
+      ];
+    }
+    
+    function isValidSource(source) {
+      return source in [
+        'Website',
+        'Voice Agent',
+        'WhatsApp',
+        'Dealer Walk-in'
+      ];
+    }
+
+    // Rules for 'leads' collection
+    match /leads/{leadId} {
+      // Read access allowed for MIS dashboard
+      allow read: if true;
+      
+      // Create lead: strict validation of required fields
+      allow create: if request.resource.data.name is string 
+                    && request.resource.data.name.size() > 0
+                    && isValidMobile(request.resource.data.phone)
+                    && isValidPincode(request.resource.data.pincode)
+                    && isValidProduct(request.resource.data.product)
+                    && isValidSource(request.resource.data.source)
+                    && isValidStatus(request.resource.data.status)
+                    && request.resource.data.dealer_name is string;
+      
+      // Update lead: primarily used to update status or lead notes
+      allow update: if isValidStatus(request.resource.data.status);
+      
+      // Delete disabled to prevent accidental data loss
+      allow delete: if false;
+    }
+    
+    // Rules for 'dealers' collection
+    match /dealers/{dealerId} {
+      allow read: if true;
+      allow write: if false; // Dealers metadata is read-only
+    }
+  }
+}

@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PuREPower | Dealer Lead Router & MIS Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Firebase App & Firestore SDKs (v10 compat via CDN) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand-group">
+        <div class="brand-badge">⚡ PURE Energy</div>
+        <div class="brand-title">
+          <h1>PuREPower Lead Router</h1>
+          <span class="sub-badge">Plant: Kandi, Sangareddy</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div id="backend-status" class="status-pill status-demo">
+          <span class="dot"></span>
+          <span id="backend-status-text">Demo Mode (Local Data)</span>
+        </div>
+        <button id="toggle-config-btn" class="btn btn-secondary btn-sm" title="Configure Firebase">⚙️ Settings</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="nav-tabs-wrapper">
+    <div class="nav-tabs">
+      <button class="tab-btn active" data-tab="lead-form-section">
+        <span>📝</span> New Lead Capture
+      </button>
+      <button class="tab-btn" data-tab="dashboard-section">
+        <span>📊</span> MIS Executive Dashboard
+        <span class="tab-count-badge" id="tab-total-badge">0</span>
+      </button>
+      <button class="tab-btn" data-tab="dealers-section">
+        <span>🏢</span> Authorized Dealer Network
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main Content Container -->
+  <main class="main-container">
+    
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden"></div>
+
+    <!-- TAB 1: Lead Capture Form -->
+    <section id="lead-form-section" class="tab-content active">
+      <div class="form-layout">
+        <div class="card form-card">
+          <div class="card-header">
+            <h2>Customer Lead Registration</h2>
+            <p>Enter prospective customer details to automatically route to the designated regional dealer.</p>
+          </div>
+
+          <form id="lead-form" novalidate>
+            <div class="form-group">
+              <label for="lead-name">Customer Full Name <span class="req">*</span></label>
+              <input type="text" id="lead-name" placeholder="e.g. Ramesh Kumar" required>
+              <div class="field-error" id="err-name"></div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="lead-phone">Mobile Number (10 Digits) <span class="req">*</span></label>
+                <div class="input-with-prefix">
+                  <span class="prefix">+91</span>
+                  <input type="tel" id="lead-phone" maxlength="10" placeholder="9876543210" required>
+                </div>
+                <div class="field-error" id="err-phone"></div>
+                <div class="field-warning" id="warn-duplicate"></div>
+              </div>
+
+              <div class="form-group">
+                <label for="lead-pincode">Pincode (6 Digits) <span class="req">*</span></label>
+                <input type="text" id="lead-pincode" maxlength="6" placeholder="502285" required>
+                <div class="field-error" id="err-pincode"></div>
+              </div>
+            </div>
+
+            <!-- Live Routing Preview Banner -->
+            <div id="routing-preview" class="routing-preview-box info">
+              <div class="routing-icon">📍</div>
+              <div class="routing-details">
+                <div class="routing-title">Auto-Assignment Routing Target</div>
+                <div class="routing-result" id="routing-preview-text">Enter customer pincode above to preview routing...</div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="lead-product">PuREPower Product <span class="req">*</span></label>
+                <select id="lead-product" required>
+                  <option value="PuREPower Home 3kWh">PuREPower Home 3kWh</option>
+                  <option value="PuREPower Home 5kWh" selected>PuREPower Home 5kWh</option>
+                  <option value="PuREPower Commercial 10kWh">PuREPower Commercial 10kWh</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="lead-source">Lead Channel / Source <span class="req">*</span></label>
+                <select id="lead-source" required>
+                  <option value="Website" selected>Website</option>
+                  <option value="Voice Agent">AI Voice Agent</option>
+                  <option value="WhatsApp">WhatsApp</option>
+                  <option value="Dealer Walk-in">Dealer Walk-in</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" id="submit-lead-btn" class="btn btn-primary">
+                <span>⚡ Route & Save Lead</span>
+              </button>
+              <button type="reset" id="reset-form-btn" class="btn btn-outline">Clear</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Sidebar Guidelines -->
+        <div class="card guidelines-card">
+          <h3>Lead Routing Logic</h3>
+          <ul class="guidelines-list">
+            <li>
+              <strong>Pincode Match:</strong> The system matches the first 3 digits of the pincode against registered dealer territories.
+            </li>
+            <li>
+              <strong>Fallback:</strong> Any pincode outside dealer coverage is automatically designated to <strong>In-house Sales</strong>.
+            </li>
+            <li>
+              <strong>De-duplication:</strong> Mobile numbers are indexed to prevent duplicate leads. Re-entry of active leads is blocked.
+            </li>
+          </ul>
+
+          <div class="kandi-badge">
+            <span class="icon">🏭</span>
+            <div>
+              <strong>Manufacturing Plant</strong>
+              <p>Kandi, Sangareddy, Telangana</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: MIS Executive Dashboard -->
+    <section id="dashboard-section" class="tab-content">
+      <!-- KPI Cards -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-label">Total Leads</div>
+          <div class="kpi-value" id="kpi-total">0</div>
+          <div class="kpi-sub">Across all regions</div>
+        </div>
+        <div class="kpi-card kpi-new">
+          <div class="kpi-label">New Leads</div>
+          <div class="kpi-value" id="kpi-new">0</div>
+          <div class="kpi-sub">Awaiting contact</div>
+        </div>
+        <div class="kpi-card kpi-contacted">
+          <div class="kpi-label">Contacted</div>
+          <div class="kpi-value" id="kpi-contacted">0</div>
+          <div class="kpi-sub">Under discussion</div>
+        </div>
+        <div class="kpi-card kpi-converted">
+          <div class="kpi-label">Converted</div>
+          <div class="kpi-value" id="kpi-converted">0</div>
+          <div class="kpi-sub">Won orders</div>
+        </div>
+        <div class="kpi-card kpi-lost">
+          <div class="kpi-label">Lost</div>
+          <div class="kpi-value" id="kpi-lost">0</div>
+          <div class="kpi-sub">Closed / disqualified</div>
+        </div>
+      </div>
+
+      <!-- Dealer Breakdown Analytics -->
+      <div class="card dashboard-card">
+        <div class="card-header flex-header">
+          <div>
+            <h3>Lead Distribution by Assigned Dealer</h3>
+            <p>Territory allocation based on customer 3-digit pincode prefixes</p>
+          </div>
+        </div>
+        <div class="dealer-stats-grid" id="dealer-stats-container">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+
+      <!-- Lead Management Table -->
+      <div class="card dashboard-card">
+        <div class="card-header flex-header">
+          <div>
+            <h3>Active Lead Records</h3>
+            <p>Filter, inspect, and update lead status in real-time</p>
+          </div>
+          <div class="table-controls">
+            <input type="text" id="search-input" placeholder="🔍 Search name or phone..." class="input-sm">
+            <select id="filter-dealer" class="input-sm">
+              <option value="ALL">All Dealers</option>
+            </select>
+            <select id="filter-status" class="input-sm">
+              <option value="ALL">All Statuses</option>
+              <option value="New">New</option>
+              <option value="Contacted">Contacted</option>
+              <option value="Converted">Converted</option>
+              <option value="Lost">Lost</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table" id="leads-table">
+            <thead>
+              <tr>
+                <th>Lead ID</th>
+                <th>Customer</th>
+                <th>Phone</th>
+                <th>Pincode</th>
+                <th>Assigned Dealer</th>
+                <th>Product</th>
+                <th>Source</th>
+                <th>Date</th>
+                <th>Status (Changeable)</th>
+              </tr>
+            </thead>
+            <tbody id="leads-tbody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: Authorized Dealers Directory -->
+    <section id="dealers-section" class="tab-content">
+      <div class="card">
+        <div class="card-header">
+          <h2>Authorized PuREPower Dealer Territories</h2>
+          <p>Territory assignment criteria defined by first 3 digits of customer pincodes</p>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Dealer Name</th>
+                <th>City / Territory</th>
+                <th>Covered Pincode Prefixes</th>
+                <th>Contact Email</th>
+              </tr>
+            </thead>
+            <tbody id="dealers-tbody">
+              <!-- Dynamically populated from dealers.csv data -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Settings Modal (Firebase Config) -->
+  <div id="config-modal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3>Firebase & Runtime Configuration</h3>
+        <button id="close-modal-btn" class="btn-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>You can connect your live Firebase project (Firestore) by pasting the configuration below. If no key is set, the app runs smoothly in <strong>Local Demo Mode</strong> with 31 verified leads.</p>
+        
+        <div class="form-group">
+          <label for="fb-config-json">Firebase Web Config (JSON):</label>
+          <textarea id="fb-config-json" rows="8" placeholder='{
+  "apiKey": "AIzaSy...",
+  "authDomain": "your-project.firebaseapp.com",
+  "projectId": "your-project",
+  "storageBucket": "your-project.appspot.com",
+  "messagingSenderId": "...",
+  "appId": "..."
+}'></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button id="save-config-btn" class="btn btn-primary">Save & Connect</button>
+          <button id="reset-demo-btn" class="btn btn-secondary">Reset to Default Data</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="app-footer">
+    <p>PURE Energy | MIS Assistant Technical Submission &bull; Developed by <strong>VENU GOPAL REDDY PALUGULLA</strong></p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

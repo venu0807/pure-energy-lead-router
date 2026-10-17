@@ -5,7 +5,7 @@ This document records the AI tooling, prompt strategies, and technical correctio
 ---
 
 ## 1. AI Tools Utilized
-- **Antigravity AI Coding Assistant (Google Gemini 3.8 / Pro):** Used for end-to-end spec-driven architecture, file scaffolding, and automated regression test creation.
+- **Google Gemini (Gemini 1.5 Pro / Advanced):** Used for data structuring, schema formulation, and automated regression test creation.
 - **Anthropic Claude 3.5 Sonnet:** Used for designing and reviewing strict Firestore Security Rules and CSS design system polish.
 - **OpenAI ChatGPT (GPT-4o):** Used for brainstorming dealer operational workflows and edge-case testing in data pipelines.
 

@@ -16,7 +16,7 @@ The web application is built with vanilla HTML5, CSS3, and modern JavaScript, fe
 To run locally on Windows:
 ```powershell
 # Navigate to the project root
-cd C:\Users\Venu\.gemini\antigravity\scratch\pure-energy-lead-router
+cd C:\Proposals\pure-energy-lead-router
 
 # Start a lightweight HTTP server
 python -m http.server 8080 --directory public
